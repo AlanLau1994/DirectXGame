@@ -35,7 +35,9 @@ public: // メンバ関数
 	/// </summary>
 	void Update();
 	void PlayerUpdate();
+	void EnemyUpdate();
 	void BeamUpdate();
+	void EnemyMove();
 	void BeamMove();
 	void BeamBorn();
 
@@ -75,10 +77,11 @@ private: // メンバ変数
 	int beamflag_ = 0;
 
 	//// ENEMY
-	//uint32_t textureHandleBeam_ = 0;
-	//Model* modelBeam_ = nullptr;
-	//WorldTransform worldTransformBeam_;
-	//int beamflag_ = 0;
+	uint32_t textureHandleEnemy_ = 0;
+	Model* modelEnemy_ = nullptr;
+	WorldTransform worldTransformEnemy_;
+	int enemyflag_ = 1;
+	float enemyspeed_ = 0.1f;
 	/// <summary>
 	/// ゲームシーン用
 	/// </summary>
