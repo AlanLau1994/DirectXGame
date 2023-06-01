@@ -38,6 +38,7 @@ public: // メンバ関数
 	void EnemyUpdate();
 	void BeamUpdate();
 	void EnemyMove();
+	void EnemyBorn();
 	void BeamMove();
 	void BeamBorn();
 
@@ -82,6 +83,7 @@ private: // メンバ変数
 	WorldTransform worldTransformEnemy_;
 	int enemyflag_ = 1;
 	float enemyspeed_ = 0.1f;
+	int reborntime_ = 50;
 	/// <summary>
 	/// ゲームシーン用
 	/// </summary>

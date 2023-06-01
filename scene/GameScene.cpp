@@ -2,7 +2,7 @@
 #include "MathUtilityForText.h"
 #include "TextureManager.h"
 #include <cassert>
-
+#include <time.h>
 GameScene::GameScene() {}
 
 GameScene::~GameScene() {
@@ -62,6 +62,7 @@ void GameScene::BeamBorn() {
 
 void GameScene::EnemyUpdate() {
 	EnemyMove();
+	EnemyBorn();
 	worldTransformEnemy_.matWorld_ = MakeAffineMatrix(
 	    worldTransformEnemy_.scale_, worldTransformEnemy_.rotation_,
 	    worldTransformEnemy_.translation_);
@@ -69,16 +70,41 @@ void GameScene::EnemyUpdate() {
 };
 void GameScene::EnemyMove() {
 	if (enemyflag_ == 1) {
-		worldTransformEnemy_.translation_.z = 40;
-
+		
+		worldTransformEnemy_.translation_.x -= enemyspeed_;
+		if (worldTransformEnemy_.translation_.z < -5)
+		{
+			enemyflag_ = 0;
+		}
 		// enemy移動
-		worldTransformEnemy_.translation_.x += enemyspeed_;
+		/*worldTransformEnemy_.translation_.x += enemyspeed_;
 		if (worldTransformEnemy_.translation_.x > 4) {
-			enemyspeed_ *= -1;
+		    enemyspeed_ *= -1;
 		}
 		if (worldTransformEnemy_.translation_.x < -4) {
-			enemyspeed_ *= -1.0f;
-		}
+		    enemyspeed_ *= -1.0f;
+		}*/
+	}
+}
+
+void GameScene::EnemyBorn() 
+{
+	if (enemyflag_ == 1) 
+	{
+	worldTransformEnemy_.translation_.z = 40;
+	worldTransformEnemy_.rotation_.x += 0.1f;
+	int x = rand() % 80; 
+	float x2 = (float)x / 10 - 4;
+	worldTransformEnemy_.translation_.x = x2;
+	reborntime_ = 50;
+	}
+	if (enemyflag_ == 0)
+	{
+	reborntime_--;
+	}
+	if (reborntime_ == 0)
+	{
+	enemyflag_ = 1;
 	}
 }
 
@@ -87,7 +113,7 @@ void GameScene::Initialize() {
 	dxCommon_ = DirectXCommon::GetInstance();
 	input_ = Input::GetInstance();
 	audio_ = Audio::GetInstance();
-
+	srand((unsigned int)time(NULL));
 	// ビュープロじぇくしょん（共通）
 	viewProjection_.translation_.y = 1;
 	viewProjection_.translation_.z = -6;
