@@ -87,24 +87,21 @@ void GameScene::EnemyMove() {
 }
 
 void GameScene::EnemyBorn() {
-	
-	
-	
+
 	if (enemyflag_ == 1) {
 
 		reborntime_ = 50;
-
 	}
 
 	if (enemyflag_ == 0) {
 		reborntime_--;
-	}
-	if (reborntime_ == 0) {
-		enemyflag_ = 1;
 		worldTransformEnemy_.translation_.z = 40;
 		int x = rand() % 80;
 		float x2 = (float)x / 10 - 4;
 		worldTransformEnemy_.translation_.x = x2;
+	}
+	if (reborntime_ == 0) {
+		enemyflag_ = 1;
 	}
 }
 
@@ -151,12 +148,46 @@ void GameScene::Initialize() {
 	modelEnemy_ = Model::Create();
 	worldTransformEnemy_.scale_ = {0.5f, 0.5f, 0.5f};
 	worldTransformEnemy_.Initialize();
+
+	// debug
+	debugText_ = DebugText::GetInstance();
+	debugText_->Initialize();
+}
+// Crash
+
+void GameScene::CollisionPlayerEnemy() {
+	if (enemyflag_ == 1) {
+		float dx = abs(worldTransformPlayer_.translation_.x - worldTransformEnemy_.translation_.x);
+		float dz = abs(worldTransformPlayer_.translation_.z - worldTransformEnemy_.translation_.z);
+
+		if (dx < 1 && dz < 1) {
+			enemyflag_ = 0;
+			playerlife_ -= 1;
+		}
+	}
+}
+void GameScene::CollisionBeamEnemy() {
+	if (enemyflag_ == 1) {
+		float dx = abs(worldTransformBeam_.translation_.x - worldTransformEnemy_.translation_.x);
+		float dz = abs(worldTransformBeam_.translation_.z - worldTransformEnemy_.translation_.z);
+
+		if (dx < 1 && dz < 1) {
+			enemyflag_ = 0;
+			gamescore_ += 1;
+		}
+	}
+}
+
+void GameScene::Collision() {
+	CollisionPlayerEnemy();
+	CollisionBeamEnemy();
 }
 
 void GameScene::Update() {
 	PlayerUpdate();
 	BeamUpdate();
 	EnemyUpdate();
+	Collision();
 }
 
 void GameScene::Draw() {
@@ -209,6 +240,13 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに前景スプライトの描画処理を追加できる
 	/// </summary>
+
+	debugText_->Print("AAA", 10, 10, 2);
+	debugText_->DrawAll();
+
+	char str[100];
+	sprintf_s(str, "SCORE %d", gamescore_);
+	debugText_->Print(str, 200.f, 10.f, 2.f);
 
 	// スプライト描画後処理
 	Sprite::PostDraw();

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Audio.h"
+#include "DebugText.h"
 #include "DirectXCommon.h"
 #include "Input.h"
 #include "Model.h"
@@ -24,7 +25,7 @@ public: // メンバ関数
 	/// デストラクタ
 	/// </summary>
 	~GameScene();
-	
+
 	/// <summary>
 	/// 初期化
 	/// </summary>
@@ -42,36 +43,40 @@ public: // メンバ関数
 	void BeamMove();
 	void BeamBorn();
 
+	// crash
+	void Collision();
+	void CollisionPlayerEnemy();
+	void CollisionBeamEnemy();
 	/// <summary>
 	/// 描画
 	/// </summary>
-	
-	
+
 	void Draw();
 
 private: // メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;
-	
-	//ビュープロじぇくしょん（共通）
+
+	// ビュープロじぇくしょん（共通）
 	ViewProjection viewProjection_;
 
 	/// BG（スプライト）
 	uint32_t textureHandleBG_ = 0;
 	Sprite* spriteBG_ = nullptr;
 
-	//STAGE
+	// STAGE
 	uint32_t textureHandleStage_ = 0;
 	Model* modelstage_ = nullptr;
 	WorldTransform worldTransformStage_;
 
-	//PLAY
+	// PLAY
 	uint32_t textureHandlePlayer_ = 0;
 	Model* modelPlayer_ = nullptr;
 	WorldTransform worldTransformPlayer_;
+	int playerlife_ = 3;
 
-	//BEAM
+	// BEAM
 	uint32_t textureHandleBeam_ = 0;
 	Model* modelBeam_ = nullptr;
 	WorldTransform worldTransformBeam_;
@@ -84,6 +89,13 @@ private: // メンバ変数
 	int enemyflag_ = 1;
 	float enemyspeed_ = 0.1f;
 	int reborntime_ = 50;
+
+	// Debug
+	DebugText* debugText_ = nullptr;
+
+	// Score
+	int gamescore_ = 0;
+
 	/// <summary>
 	/// ゲームシーン用
 	/// </summary>
