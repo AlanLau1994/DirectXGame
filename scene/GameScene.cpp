@@ -13,6 +13,7 @@ GameScene::~GameScene() {
 	delete modelEnemy_;
 }
 
+#pragma region // 基本情報
 void GameScene::PlayerUpdate() {
 	worldTransformPlayer_.matWorld_ = MakeAffineMatrix(
 	    worldTransformPlayer_.scale_, worldTransformPlayer_.rotation_,
@@ -89,7 +90,7 @@ void GameScene::EnemyMove() {
 void GameScene::EnemyBorn() {
 
 	if (enemyflag_ == 1) {
-
+	
 		reborntime_ = 50;
 	}
 
@@ -147,14 +148,15 @@ void GameScene::Initialize() {
 	textureHandleEnemy_ = TextureManager::Load("enemy.png");
 	modelEnemy_ = Model::Create();
 	worldTransformEnemy_.scale_ = {0.5f, 0.5f, 0.5f};
+	worldTransformEnemy_.translation_.z = 40;
 	worldTransformEnemy_.Initialize();
 
 	// debug
 	debugText_ = DebugText::GetInstance();
 	debugText_->Initialize();
 }
-// Crash
 
+// Crash
 void GameScene::CollisionPlayerEnemy() {
 	if (enemyflag_ == 1) {
 		float dx = abs(worldTransformPlayer_.translation_.x - worldTransformEnemy_.translation_.x);
@@ -182,12 +184,44 @@ void GameScene::Collision() {
 	CollisionPlayerEnemy();
 	CollisionBeamEnemy();
 }
+void GameScene::GamePlayDraw3D() {
+	modelstage_->Draw(worldTransformStage_, viewProjection_, textureHandleStage_);
 
-void GameScene::Update() {
+	modelPlayer_->Draw(worldTransformPlayer_, viewProjection_, textureHandlePlayer_);
+	if (enemyflag_ == 1) {
+
+		modelEnemy_->Draw(worldTransformEnemy_, viewProjection_, textureHandleEnemy_);
+	}
+	if (beamflag_ == 1) {
+		modelBeam_->Draw(worldTransformBeam_, viewProjection_, textureHandleBeam_);
+	}
+}
+void GameScene::GamePlayDraw2DBack() { spriteBG_->Draw(); }
+void GameScene::GamePlayDraw2DNear() {
+	debugText_->Print("AAA", 10, 10, 2);
+
+	char str[100];
+	sprintf_s(str, "SCORE %d", gamescore_);
+	debugText_->Print(str, 200.f, 10.f, 2.f);
+
+	sprintf_s(str, "LIFE %d", playerlife_);
+	debugText_->Print(str, 900.f, 10.f, 2.f);
+};
+void GameScene::GamePlayUpdate() {
 	PlayerUpdate();
 	BeamUpdate();
 	EnemyUpdate();
 	Collision();
+}
+
+#pragma endregion
+void GameScene::Update() {
+	switch (sceneMode_) {
+	case 0:
+		GamePlayUpdate(); 
+	break;
+	}
+
 }
 
 void GameScene::Draw() {
@@ -202,8 +236,12 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに背景スプライトの描画処理を追加できる
 	/// </summary>
-
-	spriteBG_->Draw();
+	///
+	switch (sceneMode_) {
+	case 0:
+	GamePlayDraw2DBack();
+	break;
+	}
 
 	// スプライト描画後処理
 	Sprite::PostDraw();
@@ -218,16 +256,10 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-
-	modelstage_->Draw(worldTransformStage_, viewProjection_, textureHandleStage_);
-
-	modelPlayer_->Draw(worldTransformPlayer_, viewProjection_, textureHandlePlayer_);
-	if (enemyflag_ == 1) {
-
-		modelEnemy_->Draw(worldTransformEnemy_, viewProjection_, textureHandleEnemy_);
-	}
-	if (beamflag_ == 1) {
-		modelBeam_->Draw(worldTransformBeam_, viewProjection_, textureHandleBeam_);
+	switch (sceneMode_) {
+	case 0:
+	GamePlayDraw3D();
+	break;
 	}
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
@@ -241,13 +273,13 @@ void GameScene::Draw() {
 	/// ここに前景スプライトの描画処理を追加できる
 	/// </summary>
 
-	debugText_->Print("AAA", 10, 10, 2);
 	debugText_->DrawAll();
-
-	char str[100];
-	sprintf_s(str, "SCORE %d", gamescore_);
-	debugText_->Print(str, 200.f, 10.f, 2.f);
-
+	
+	switch (sceneMode_) {
+	case 0:
+	GamePlayDraw2DNear();
+	break;
+	}
 	// スプライト描画後処理
 	Sprite::PostDraw();
 

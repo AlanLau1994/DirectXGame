@@ -47,6 +47,13 @@ public: // メンバ関数
 	void Collision();
 	void CollisionPlayerEnemy();
 	void CollisionBeamEnemy();
+	
+	//Arrangement
+	void GamePlayUpdate();
+	void GamePlayDraw3D();
+	void GamePlayDraw2DBack();
+	void GamePlayDraw2DNear();
+	
 	/// <summary>
 	/// 描画
 	/// </summary>
@@ -95,6 +102,10 @@ private: // メンバ変数
 
 	// Score
 	int gamescore_ = 0;
+
+
+	//scenechange
+	int sceneMode_ = 0;
 
 	/// <summary>
 	/// ゲームシーン用
