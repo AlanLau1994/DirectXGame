@@ -81,7 +81,7 @@ private: // メンバ変数
 	uint32_t textureHandlePlayer_ = 0;
 	Model* modelPlayer_ = nullptr;
 	WorldTransform worldTransformPlayer_;
-	int playerlife_ = 3;
+	int playerlife_ = 1;
 
 	// BEAM
 	uint32_t textureHandleBeam_ = 0;
@@ -105,7 +105,27 @@ private: // メンバ変数
 
 
 	//scenechange
-	int sceneMode_ = 0;
+	int sceneMode_ = 1;
+	
+	//title
+	void TitleUpdate();
+	void TitleDraw2DNear();
+	uint32_t textureHandleTitle_ = 0;
+	Sprite* spriteTitle_ = nullptr;
+	uint32_t textureHandleEnter_ = 0;
+	Sprite* spriteEnter_ = nullptr;
+	int gameTimer_ = 0;
+
+	// GameOver
+	void GameOverUpdate();
+	void GameOverDraw2DNear();
+	void GameOver3D();
+	uint32_t textureHandleGameOver_ = 0;
+	Sprite* spriteGameOver_ = nullptr;
+	uint32_t textureHandleGOEnter_ = 0;
+	Sprite* spriteGOEnter_ = nullptr;
+
+	void GamePlayStart();
 
 	/// <summary>
 	/// ゲームシーン用

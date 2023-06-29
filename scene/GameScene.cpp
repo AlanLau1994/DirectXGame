@@ -11,6 +11,8 @@ GameScene::~GameScene() {
 	delete modelPlayer_;
 	delete modelBeam_;
 	delete modelEnemy_;
+	delete spriteTitle_;
+	delete spriteGameOver_;
 }
 
 #pragma region // 基本情報
@@ -71,26 +73,18 @@ void GameScene::EnemyUpdate() {
 };
 void GameScene::EnemyMove() {
 
-	worldTransformEnemy_.translation_.z -= enemyspeed_;
+	worldTransformEnemy_.translation_.z -= enemyspeed_ * 3;
 
 	worldTransformEnemy_.rotation_.x -= 0.1f;
 	if (worldTransformEnemy_.translation_.z < -5) {
 		enemyflag_ = 0;
 	}
-	// enemy移動
-	/*worldTransformEnemy_.translation_.x += enemyspeed_;
-	if (worldTransformEnemy_.translation_.x > 4) {
-	    enemyspeed_ *= -1;
-	}
-	if (worldTransformEnemy_.translation_.x < -4) {
-	    enemyspeed_ *= -1.0f;
-	}*/
 }
 
 void GameScene::EnemyBorn() {
 
 	if (enemyflag_ == 1) {
-	
+
 		reborntime_ = 50;
 	}
 
@@ -154,6 +148,20 @@ void GameScene::Initialize() {
 	// debug
 	debugText_ = DebugText::GetInstance();
 	debugText_->Initialize();
+
+	// title
+	textureHandleTitle_ = TextureManager::Load("title.png");
+	spriteTitle_ = Sprite::Create(textureHandleTitle_, {0, 0});
+
+	textureHandleEnter_ = TextureManager::Load("enter.png");
+	spriteEnter_ = Sprite::Create(textureHandleEnter_, {400, 400});
+
+	// GameOver
+	textureHandleGameOver_ = TextureManager::Load("gameover.png");
+	spriteGameOver_ = Sprite::Create(textureHandleGameOver_, {0, 0});
+
+	textureHandleGOEnter_ = TextureManager::Load("enter.png");
+	spriteGOEnter_ = Sprite::Create(textureHandleGOEnter_, {400, 400});
 }
 
 // Crash
@@ -207,6 +215,41 @@ void GameScene::GamePlayDraw2DNear() {
 	sprintf_s(str, "LIFE %d", playerlife_);
 	debugText_->Print(str, 900.f, 10.f, 2.f);
 };
+
+// SCENE CHANGE
+void GameScene::TitleUpdate() {}
+void GameScene::TitleDraw2DNear() {
+	spriteTitle_->Draw();
+	if (gameTimer_ % 40 >= 20) {
+		spriteEnter_->Draw();
+	}
+}
+
+void GameScene::GameOverUpdate() {}
+void GameScene::GameOverDraw2DNear() {
+	
+	spriteGameOver_->Draw();
+
+	if (gameTimer_ % 40 >= 20) {
+		spriteGOEnter_->Draw();
+	}
+}
+void GameScene::GameOver3D() {
+	modelstage_->Draw(worldTransformStage_, viewProjection_, textureHandleStage_);
+
+	modelPlayer_->Draw(worldTransformPlayer_, viewProjection_, textureHandlePlayer_);
+}
+
+void GameScene::GamePlayStart() {
+	playerlife_ = 3;
+	gamescore_ = 0;
+	worldTransformEnemy_.translation_.z = 40;
+	gameTimer_ = 0;
+	enemyflag_ = 1;
+	reborntime_ = 50;
+	worldTransformPlayer_.translation_.x =0;
+}
+
 void GameScene::GamePlayUpdate() {
 	PlayerUpdate();
 	BeamUpdate();
@@ -216,12 +259,30 @@ void GameScene::GamePlayUpdate() {
 
 #pragma endregion
 void GameScene::Update() {
+	gameTimer_ += 1;
 	switch (sceneMode_) {
 	case 0:
-		GamePlayUpdate(); 
-	break;
-	}
+		GamePlayUpdate();
+		if (playerlife_ == 0) {
+			sceneMode_ = 2;
+		}
+		break;
+	case 1:
+		TitleUpdate();
 
+		if (input_->TriggerKey(DIK_RETURN)) {
+			sceneMode_ = 0;
+			GamePlayStart();
+		}
+
+		break;
+	case 2:
+		GameOverUpdate();
+		if (input_->TriggerKey(DIK_RETURN)) {
+			sceneMode_ = 1;
+		}
+		break;
+	}
 }
 
 void GameScene::Draw() {
@@ -239,8 +300,14 @@ void GameScene::Draw() {
 	///
 	switch (sceneMode_) {
 	case 0:
-	GamePlayDraw2DBack();
-	break;
+		GamePlayDraw2DBack();
+		break;
+	case 1:
+
+		break;
+	case 2:
+		GamePlayDraw2DBack();
+		break;
 	}
 
 	// スプライト描画後処理
@@ -258,8 +325,14 @@ void GameScene::Draw() {
 	/// </summary>
 	switch (sceneMode_) {
 	case 0:
-	GamePlayDraw3D();
-	break;
+		GamePlayDraw3D();
+		break;
+	case 1:
+
+		break;
+	case 2:
+		GameOver3D();
+		break;
 	}
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
@@ -274,11 +347,17 @@ void GameScene::Draw() {
 	/// </summary>
 
 	debugText_->DrawAll();
-	
+
 	switch (sceneMode_) {
 	case 0:
-	GamePlayDraw2DNear();
-	break;
+		GamePlayDraw2DNear();
+		break;
+	case 1:
+		TitleDraw2DNear();
+		break;
+	case 2:
+		GameOverDraw2DNear();
+		break;
 	}
 	// スプライト描画後処理
 	Sprite::PostDraw();
