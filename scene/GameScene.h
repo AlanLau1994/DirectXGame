@@ -47,13 +47,13 @@ public: // メンバ関数
 	void Collision();
 	void CollisionPlayerEnemy();
 	void CollisionBeamEnemy();
-	
-	//Arrangement
+
+	// Arrangement
 	void GamePlayUpdate();
 	void GamePlayDraw3D();
 	void GamePlayDraw2DBack();
 	void GamePlayDraw2DNear();
-	
+
 	/// <summary>
 	/// 描画
 	/// </summary>
@@ -92,10 +92,11 @@ private: // メンバ変数
 	//// ENEMY
 	uint32_t textureHandleEnemy_ = 0;
 	Model* modelEnemy_ = nullptr;
-	WorldTransform worldTransformEnemy_;
-	int enemyflag_ = 1;
-	float enemyspeed_ = 0.1f;
-	int reborntime_ = 50;
+	WorldTransform worldTransformEnemy_[10] = {};
+	int enemyflag_[10] = {};
+	float enemyspeed_= 0.1f;
+
+	// Multiply
 
 	// Debug
 	DebugText* debugText_ = nullptr;
@@ -103,11 +104,10 @@ private: // メンバ変数
 	// Score
 	int gamescore_ = 0;
 
-
-	//scenechange
+	// scenechange
 	int sceneMode_ = 1;
-	
-	//title
+
+	// title
 	void TitleUpdate();
 	void TitleDraw2DNear();
 	uint32_t textureHandleTitle_ = 0;
