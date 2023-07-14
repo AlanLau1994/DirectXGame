@@ -128,6 +128,14 @@ private: // メンバ変数
 
 	void GamePlayStart();
 
+	// sound
+	uint32_t soundDataHandleTitleBGM_ = 0;
+	uint32_t soundDataHandleGamePlayBGM_ = 0;
+	uint32_t soundDataHandleGameOverBGM_ = 0;
+	uint32_t soundDataHandleEnemyHitBGM_ = 0;
+	uint32_t soundDataHandlePlayerHitBGM_ = 0;
+	uint32_t voiceHandleBGM_ = 0;
+
 	/// <summary>
 	/// ゲームシーン用
 	/// </summary>

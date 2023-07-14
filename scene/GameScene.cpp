@@ -197,6 +197,14 @@ void GameScene::Initialize() {
 
 	textureHandleGOEnter_ = TextureManager::Load("enter.png");
 	spriteGOEnter_ = Sprite::Create(textureHandleGOEnter_, {400, 400});
+
+	// sound
+	soundDataHandleTitleBGM_ = audio_->LoadWave("Audio/Ring05.wav");
+	soundDataHandleGamePlayBGM_ = audio_->LoadWave("Audio/Ring08.wav");
+	soundDataHandleGameOverBGM_ = audio_->LoadWave("Audio/Ring09.wav");
+	soundDataHandleEnemyHitBGM_ = audio_->LoadWave("Audio/chord.wav");
+	soundDataHandlePlayerHitBGM_ = audio_->LoadWave("Audio/tada.wav");
+	voiceHandleBGM_ = audio_->PlayWave(soundDataHandleTitleBGM_, true);
 }
 
 // Crash
@@ -211,6 +219,7 @@ void GameScene::CollisionPlayerEnemy() {
 			if (dx < 1 && dz < 1) {
 				enemyflag_[i] = 0;
 				playerlife_ -= 1;
+				audio_->PlayWave(soundDataHandlePlayerHitBGM_);
 			}
 		}
 	}
@@ -230,7 +239,9 @@ void GameScene::CollisionBeamEnemy() {
 					if (dx < 1 && dz < 1) {
 						enemyflag_[i] = 0;
 						beamflag_[e] = 0;
+						audio_->PlayWave(soundDataHandleEnemyHitBGM_);
 						gamescore_ += 1;
+
 					}
 				}
 			}
@@ -273,7 +284,16 @@ void GameScene::GamePlayDraw2DNear() {
 };
 
 // SCENE CHANGE
-void GameScene::TitleUpdate() {}
+void GameScene::TitleUpdate() {
+
+	if (input_->TriggerKey(DIK_RETURN)) {
+		sceneMode_ = 0;
+		audio_->StopWave(voiceHandleBGM_);
+		voiceHandleBGM_ = audio_->PlayWave(soundDataHandleGamePlayBGM_, true);
+		GamePlayStart();
+
+	}
+}
 void GameScene::TitleDraw2DNear() {
 	spriteTitle_->Draw();
 	if (gameTimer_ % 40 >= 20) {
@@ -281,7 +301,14 @@ void GameScene::TitleDraw2DNear() {
 	}
 }
 
-void GameScene::GameOverUpdate() {}
+void GameScene::GameOverUpdate() {
+	if (input_->TriggerKey(DIK_RETURN)) {
+		sceneMode_ = 1;
+		audio_->StopWave(voiceHandleBGM_);
+		voiceHandleBGM_ = audio_->PlayWave(soundDataHandleTitleBGM_, true);
+		
+	}
+}
 void GameScene::GameOverDraw2DNear() {
 
 	spriteGameOver_->Draw();
@@ -311,6 +338,12 @@ void GameScene::GamePlayUpdate() {
 	BeamUpdate();
 	EnemyUpdate();
 	Collision();
+	if (playerlife_ == 0) {
+		sceneMode_ = 2;
+		audio_->StopWave(voiceHandleBGM_);
+		voiceHandleBGM_ = audio_->PlayWave(soundDataHandleGameOverBGM_, true);
+		
+	}
 }
 
 #pragma endregion
@@ -319,24 +352,16 @@ void GameScene::Update() {
 	switch (sceneMode_) {
 	case 0:
 		GamePlayUpdate();
-		if (playerlife_ == 0) {
-			sceneMode_ = 2;
-		}
+		
 		break;
 	case 1:
 		TitleUpdate();
 
-		if (input_->TriggerKey(DIK_RETURN)) {
-			sceneMode_ = 0;
-			GamePlayStart();
-		}
 
 		break;
 	case 2:
 		GameOverUpdate();
-		if (input_->TriggerKey(DIK_RETURN)) {
-			sceneMode_ = 1;
-		}
+		
 		break;
 	}
 }
