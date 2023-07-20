@@ -43,8 +43,8 @@ public: // メンバ関数
 	void EnemyJump();
 	void BeamMove();
 	void BeamBorn();
-	
-
+	void DrawScore();
+	void DrawLife();
 	// crash
 	void Collision();
 	void CollisionPlayerEnemy();
@@ -89,7 +89,9 @@ private: // メンバ変数
 	uint32_t textureHandlePlayer_ = 0;
 	Model* modelPlayer_ = nullptr;
 	WorldTransform worldTransformPlayer_;
-	int playerlife_ = 1;
+	int playerlife_ = 3;
+	Sprite* spriteLife_[3] = {};
+
 
 	// BEAM
 	uint32_t textureHandleBeam_ = 0;
@@ -114,6 +116,10 @@ private: // メンバ変数
 
 	// Score
 	int gamescore_ = 0;
+	uint32_t textureHandleNumber_ = 0;
+	Sprite* spriteNumber_[5] = {};
+	uint32_t textureHandleScore_ = 0;
+	Sprite* spriteScore_ = nullptr;
 
 	// scenechange
 	int sceneMode_ = 1;
@@ -145,6 +151,9 @@ private: // メンバ変数
 	uint32_t soundDataHandleEnemyHitBGM_ = 0;
 	uint32_t soundDataHandlePlayerHitBGM_ = 0;
 	uint32_t voiceHandleBGM_ = 0;
+
+	
+
 
 	/// <summary>
 	/// ゲームシーン用

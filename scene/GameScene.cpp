@@ -105,7 +105,6 @@ void GameScene::EnemyMove() {
 			}
 
 			worldTransformEnemy_[i].rotation_.x -= 0.1f;
-			
 		}
 
 		if (worldTransformEnemy_[i].translation_.z < -5) {
@@ -180,12 +179,16 @@ void GameScene::Initialize() {
 		worldTransformStage_[i].TransferMatrix();
 	}
 
-
 	// PLAYER
 	textureHandlePlayer_ = TextureManager::Load("player.png");
 	modelPlayer_ = Model::Create();
 	worldTransformPlayer_.scale_ = {0.5f, 0.5f, 0.5f};
 	worldTransformPlayer_.Initialize();
+	for (int i = 0; i < 5; i++) {
+		spriteLife_[i] = Sprite::Create(textureHandlePlayer_, {800.0f + i * 60, 10});
+		spriteLife_[i]->SetSize({40, 40});
+	}
+	
 
 	// Beam
 	textureHandleBeam_ = TextureManager::Load("beam.png");
@@ -232,6 +235,15 @@ void GameScene::Initialize() {
 	soundDataHandleEnemyHitBGM_ = audio_->LoadWave("Audio/chord.wav");
 	soundDataHandlePlayerHitBGM_ = audio_->LoadWave("Audio/tada.wav");
 	voiceHandleBGM_ = audio_->PlayWave(soundDataHandleTitleBGM_, true);
+
+	// score
+	textureHandleNumber_ = TextureManager::Load("number.png");
+	for (int i = 0; i < 5; i++) {
+		spriteNumber_[i] = Sprite::Create(textureHandleNumber_, {300.0f + i * 26, 0});
+	}
+	textureHandleScore_ = TextureManager::Load("score.png");
+	spriteScore_ = Sprite::Create(textureHandleScore_, {170, 0});
+
 }
 
 // Crash
@@ -318,12 +330,9 @@ void GameScene::GamePlayDraw2DBack() { spriteBG_->Draw(); }
 void GameScene::GamePlayDraw2DNear() {
 	debugText_->Print("AAA", 10, 10, 2);
 
-	char str[100];
-	sprintf_s(str, "SCORE %d", gamescore_);
-	debugText_->Print(str, 200.f, 10.f, 2.f);
-
-	sprintf_s(str, "LIFE %d", playerlife_);
-	debugText_->Print(str, 900.f, 10.f, 2.f);
+	DrawScore();
+	DrawLife();
+	
 };
 
 // SCENE CHANGE
@@ -389,6 +398,31 @@ void GameScene::GamePlayUpdate() {
 	}
 }
 
+void GameScene::DrawScore() {
+	int eachNumber[5] = {};
+	int number = gamescore_;
+	
+	int keta = 10000;
+	
+	for (int i = 0; i < 5; i++) {
+		eachNumber[i] = number / keta;
+		number = number % keta;
+		keta = keta / 10;
+		
+		spriteNumber_[i]->SetSize({32, 64});
+		spriteNumber_[i]->SetTextureRect({32.0f * eachNumber[i], 0}, {32, 64});
+		spriteNumber_[i]->Draw();
+	}
+	spriteScore_->Draw();
+}
+
+void GameScene::DrawLife()
+{
+	for (int i = 0; i < playerlife_; i++) {
+		
+		spriteLife_[i]->Draw();
+	}
+}
 #pragma endregion
 void GameScene::Update() {
 	gameTimer_ += 1;
