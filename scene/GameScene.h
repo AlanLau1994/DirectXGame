@@ -40,8 +40,10 @@ public: // メンバ関数
 	void BeamUpdate();
 	void EnemyMove();
 	void EnemyBorn();
+	void EnemyJump();
 	void BeamMove();
 	void BeamBorn();
+	
 
 	// crash
 	void Collision();
@@ -53,6 +55,11 @@ public: // メンバ関数
 	void GamePlayDraw3D();
 	void GamePlayDraw2DBack();
 	void GamePlayDraw2DNear();
+
+	//scroll
+	void StageUpdate();
+
+	//
 
 	/// <summary>
 	/// 描画
@@ -75,7 +82,8 @@ private: // メンバ変数
 	// STAGE
 	uint32_t textureHandleStage_ = 0;
 	Model* modelstage_ = nullptr;
-	WorldTransform worldTransformStage_;
+	WorldTransform worldTransformStage_[20];
+	
 
 	// PLAY
 	uint32_t textureHandlePlayer_ = 0;
@@ -90,13 +98,15 @@ private: // メンバ変数
 
 	int beamflag_[10] = {};
 	int beamtimer_ = 0;
+
 	//// ENEMY
 	uint32_t textureHandleEnemy_ = 0;
 	Model* modelEnemy_ = nullptr;
 	WorldTransform worldTransformEnemy_[10];
 	int enemyflag_[10] = {};
 	float enemyspeed_[10] = {};
-
+	float enemyJumpSpeed_[10] = {};
+	
 	// Multiply
 
 	// Debug

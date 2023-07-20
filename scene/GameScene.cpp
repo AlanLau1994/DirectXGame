@@ -35,7 +35,7 @@ void GameScene::PlayerUpdate() {
 		worldTransformPlayer_.translation_.x = -4;
 	}
 }
-
+#pragma region // beam
 void GameScene::BeamUpdate() {
 	BeamBorn();
 	BeamMove();
@@ -78,10 +78,12 @@ void GameScene::BeamBorn() {
 		}
 	}
 }
+#pragma endregion
 
+#pragma region // enemy
 void GameScene::EnemyUpdate() {
 	EnemyBorn();
-
+	EnemyJump();
 	EnemyMove();
 	for (int i = 0; i < 10; i++) {
 		worldTransformEnemy_[i].matWorld_ = MakeAffineMatrix(
@@ -92,16 +94,19 @@ void GameScene::EnemyUpdate() {
 };
 void GameScene::EnemyMove() {
 	for (int i = 0; i < 10; i++) {
-		worldTransformEnemy_[i].translation_.z -= 0.3f;
+		if (enemyflag_[i] == 1) {
+			worldTransformEnemy_[i].translation_.z -= 0.3f;
+			worldTransformEnemy_[i].translation_.z -= gameTimer_ / 1000.0f;
+			worldTransformEnemy_[i].translation_.x += enemyspeed_[i];
+			if (worldTransformEnemy_[i].translation_.x > 4) {
+				worldTransformEnemy_[i].translation_.x *= -1;
+			} else if (worldTransformEnemy_[i].translation_.x < -4) {
+				worldTransformEnemy_[i].translation_.x *= -1;
+			}
 
-		worldTransformEnemy_[i].translation_.x += enemyspeed_[i];
-		if (worldTransformEnemy_[i].translation_.x > 4) {
-			worldTransformEnemy_[i].translation_.x *= -1;
-		} else if (worldTransformEnemy_[i].translation_.x < -4) {
-			worldTransformEnemy_[i].translation_.x *= -1;
+			worldTransformEnemy_[i].rotation_.x -= 0.1f;
+			
 		}
-
-		worldTransformEnemy_[i].rotation_.x -= 0.1f;
 
 		if (worldTransformEnemy_[i].translation_.z < -5) {
 
@@ -130,6 +135,20 @@ void GameScene::EnemyBorn() {
 		}
 	}
 }
+void GameScene::EnemyJump() {
+	for (int i = 0; i < 10; i++) {
+		if (enemyflag_[i] == 2) {
+			worldTransformEnemy_[i].translation_.y += enemyJumpSpeed_[i] * 2;
+			enemyJumpSpeed_[i] -= 0.1f;
+			worldTransformEnemy_[i].translation_.x += enemyspeed_[i] * 4;
+		}
+		if (worldTransformEnemy_[i].translation_.y < -3) {
+			enemyflag_[i] = 0;
+			worldTransformEnemy_[i].translation_.y = 0;
+		}
+	}
+}
+#pragma endregion
 
 void GameScene::Initialize() {
 
@@ -147,15 +166,20 @@ void GameScene::Initialize() {
 	spriteBG_ = Sprite::Create(textureHandleBG_, {0, 0});
 
 	// STAGE
-	textureHandleStage_ = TextureManager::Load("stage.jpg");
+	textureHandleStage_ = TextureManager::Load("stage2.jpg");
 	modelstage_ = Model::Create();
-	worldTransformStage_.translation_ = {0, -1.5f, 0};
-	worldTransformStage_.scale_ = {4.5f, 1, 40};
-	worldTransformStage_.Initialize();
-	worldTransformStage_.matWorld_ = MakeAffineMatrix(
-	    worldTransformStage_.scale_, worldTransformStage_.rotation_,
-	    worldTransformStage_.translation_);
-	worldTransformStage_.TransferMatrix();
+	for (int i = 0; i < 20; i++) {
+		worldTransformStage_[i].Initialize();
+	}
+	for (int i = 0; i < 20; i++) {
+		worldTransformStage_[i].translation_ = {0, -1.5f, 2.0f * i - 5};
+		worldTransformStage_[i].scale_ = {4.5f, 1, 1};
+		worldTransformStage_[i].matWorld_ = MakeAffineMatrix(
+		    worldTransformStage_[i].scale_, worldTransformStage_[i].rotation_,
+		    worldTransformStage_[i].translation_);
+		worldTransformStage_[i].TransferMatrix();
+	}
+
 
 	// PLAYER
 	textureHandlePlayer_ = TextureManager::Load("player.png");
@@ -179,7 +203,10 @@ void GameScene::Initialize() {
 		worldTransformEnemy_[i].scale_ = {0.5f, 0.5f, 0.5f};
 		worldTransformEnemy_[i].translation_.z = 40;
 		worldTransformEnemy_[i].Initialize();
+		enemyspeed_[i] = 0.1f;
+		enemyJumpSpeed_[i] = 0.1f;
 	}
+
 	// debug
 	debugText_ = DebugText::GetInstance();
 	debugText_->Initialize();
@@ -237,28 +264,45 @@ void GameScene::CollisionBeamEnemy() {
 					        worldTransformEnemy_[i].translation_.z);
 
 					if (dx < 1 && dz < 1) {
-						enemyflag_[i] = 0;
+						enemyflag_[i] = 2;
 						beamflag_[e] = 0;
 						audio_->PlayWave(soundDataHandleEnemyHitBGM_);
 						gamescore_ += 1;
-
+						enemyJumpSpeed_[i] = 1;
 					}
 				}
 			}
 		}
 	}
 }
-
 void GameScene::Collision() {
 	CollisionPlayerEnemy();
 	CollisionBeamEnemy();
 }
+
+// scroll
+void GameScene::StageUpdate() {
+	for (int i = 0; i < 20; i++) {
+		worldTransformStage_[i].translation_.z -= 0.1f;
+		if (worldTransformStage_[i].translation_.z < -5) {
+			worldTransformStage_[i].translation_.z += 40;
+		}
+
+		worldTransformStage_[i].matWorld_ = MakeAffineMatrix(
+		    worldTransformStage_[i].scale_, worldTransformStage_[i].rotation_,
+		    worldTransformStage_[i].translation_);
+		worldTransformStage_[i].TransferMatrix();
+	}
+}
+
 void GameScene::GamePlayDraw3D() {
-	modelstage_->Draw(worldTransformStage_, viewProjection_, textureHandleStage_);
+	for (int i = 0; i < 20; i++) {
+		modelstage_->Draw(worldTransformStage_[i], viewProjection_, textureHandleStage_);
+	}
 
 	modelPlayer_->Draw(worldTransformPlayer_, viewProjection_, textureHandlePlayer_);
 	for (int i = 0; i < 10; i++) {
-		if (enemyflag_[i] == 1) {
+		if (enemyflag_[i] != 0) {
 
 			modelEnemy_->Draw(worldTransformEnemy_[i], viewProjection_, textureHandleEnemy_);
 		}
@@ -270,7 +314,6 @@ void GameScene::GamePlayDraw3D() {
 		}
 	}
 }
-
 void GameScene::GamePlayDraw2DBack() { spriteBG_->Draw(); }
 void GameScene::GamePlayDraw2DNear() {
 	debugText_->Print("AAA", 10, 10, 2);
@@ -291,7 +334,6 @@ void GameScene::TitleUpdate() {
 		audio_->StopWave(voiceHandleBGM_);
 		voiceHandleBGM_ = audio_->PlayWave(soundDataHandleGamePlayBGM_, true);
 		GamePlayStart();
-
 	}
 }
 void GameScene::TitleDraw2DNear() {
@@ -306,7 +348,6 @@ void GameScene::GameOverUpdate() {
 		sceneMode_ = 1;
 		audio_->StopWave(voiceHandleBGM_);
 		voiceHandleBGM_ = audio_->PlayWave(soundDataHandleTitleBGM_, true);
-		
 	}
 }
 void GameScene::GameOverDraw2DNear() {
@@ -318,7 +359,9 @@ void GameScene::GameOverDraw2DNear() {
 	}
 }
 void GameScene::GameOver3D() {
-	modelstage_->Draw(worldTransformStage_, viewProjection_, textureHandleStage_);
+	for (int i = 0; i < 20; i++) {
+		modelstage_->Draw(worldTransformStage_[i], viewProjection_, textureHandleStage_);
+	}
 
 	modelPlayer_->Draw(worldTransformPlayer_, viewProjection_, textureHandlePlayer_);
 }
@@ -338,11 +381,11 @@ void GameScene::GamePlayUpdate() {
 	BeamUpdate();
 	EnemyUpdate();
 	Collision();
+	StageUpdate();
 	if (playerlife_ == 0) {
 		sceneMode_ = 2;
 		audio_->StopWave(voiceHandleBGM_);
 		voiceHandleBGM_ = audio_->PlayWave(soundDataHandleGameOverBGM_, true);
-		
 	}
 }
 
@@ -352,16 +395,15 @@ void GameScene::Update() {
 	switch (sceneMode_) {
 	case 0:
 		GamePlayUpdate();
-		
+
 		break;
 	case 1:
 		TitleUpdate();
 
-
 		break;
 	case 2:
 		GameOverUpdate();
-		
+
 		break;
 	}
 }
